@@ -33,6 +33,7 @@ library(kabble)
 
 ## AIC and BIC criteria
 
+## Validation of the model
 # Prediction
 ## Confidence region of level α
 ## Hypothesis
