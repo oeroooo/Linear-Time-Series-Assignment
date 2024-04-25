@@ -19,3 +19,22 @@ library(dplyr)
 library(kabble)
 ```
 
+# The data 
+## The studied temporal series
+
+## Transformation of the series 
+
+## Representation of the series before and after transformation
+
+
+
+# ARMA models
+## Selection of the arma model
+
+## AIC and BIC criteria
+
+# Prediction
+## Confidence region of level α
+## Hypothesis
+## Graphic representation
+## Open question
