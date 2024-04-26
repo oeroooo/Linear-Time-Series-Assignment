@@ -16,17 +16,36 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=
 
 ```{r}
 library(dplyr)
+library(kableExtra)
 ```
 
 # The data 
 ## The studied temporal series
 ```{r}
 Time_series <- read.csv("data/valeurs_mensuelles.csv", sep = ";") %>%  
-  filter(!row_number() %in% c(1, 2, 3))
+  filter(!row_number() %in% c(1, 2, 3)) 
+
+names(Time_series) <- c("date", "value", "codes")
+Time_series$date <- as.Date(paste(Time_series$date, "-01", sep=""))
+Time_series$value <- as.numeric(Time_series$value)
+
+
 caracteristiques <- read.csv("data/caractéristiques.csv", sep = ";")
 ```
+In this project, we will study the monthly series of the fabrication of french weapons and ammo from 1990 to 2024. This series is accessible 
+in the INSEE website https://www.insee.fr/fr/statistiques/serie/010767975.
+The initial series is ploted on the following graph:
+
+```{r}
+plotly::plot_ly(x = Time_series$date, y = Time_series$value, type = "scatter", mode = "lines") %>%
+  plotly::layout(title = "Monthly series of the fabrication of french weapons and ammo from 1990 to 2024",
+                 xaxis = list(title = "Date"),
+                 yaxis = list(title = "Value"))
+```
+
 
 ## Transformation of the series 
+
 
 ## Representation of the series before and after transformation
 
