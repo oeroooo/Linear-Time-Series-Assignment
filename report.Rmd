@@ -45,10 +45,20 @@ plotly::plot_ly(x = Time_series$date, y = Time_series$value, type = "scatter", m
 
 
 ## Transformation of the series 
+We will use the log return of the series to make it stationary. 
+```{r}
+Time_series$log_return <- c(NA, diff(log(Time_series$value)))
+```
+We will plot the log return of the series to check if it is stationary.
+```{r}
+plotly::plot_ly(x = Time_series$date, y = Time_series$log_return, type = "scatter", mode = "lines") %>%
+  plotly::layout(title = "Log return of the series",
+                 xaxis = list(title = "Date"),
+                 yaxis = list(title = "Value"))
+```
 
 
 ## Representation of the series before and after transformation
-
 
 
 # ARMA models
