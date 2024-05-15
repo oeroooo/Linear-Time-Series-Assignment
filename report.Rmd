@@ -99,9 +99,96 @@ plotly::subplot(
 # ARMA models
 ## Selection of the arma model
 We see that the tests of the stationarity consider a maximum lag of 5. Hence we will select our p and q parameters in the ARMA model between 0 and 6. 
+To get the best model, we will use the AIC and BIC criteria.
 ## AIC and BIC criteria
+AIC and BIC for the differents arma(i,j) models where i and j are between 0 and 6.
+```{r}
+AIC_BIC <- data.frame(p = integer(), q = integer(), AIC = numeric(), BIC = numeric())
+for (i in 0:6){
+  for (j in 0:6){
+    model <- arima(log_return, order = c(i, 0, j))
+    AIC_BIC <- rbind(AIC_BIC, data.frame(p = i, q = j, AIC = AIC(model), BIC = BIC(model)))
+  }
+}
+
+kable(AIC_BIC, format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = F)
+```
+For a model (p, q), it's considered as a valid model if the absolute value of the fraction of the estimated coefficient and its standard error is superior to 1.96 for the highest coefficient associated to autoregressif and moving average terms. 
+In the table we represent this information with YES and NO as the first coordinate of our table. Furthermore, a model is considered as valid if the p value of the Ljung-Box test is superior to 0.05. We will represent this information with YES and NO as the second coordinate of our table.
+```{r}
+# Initialize the dataframe
+validity <- data.frame(p = integer(), q = integer(), Valid_AR_MA = character(), Valid_Ljung_Box = character())
+
+# Loop over potential orders of p and q
+for (i in 0:6) {
+  for (j in 0:6) {
+    # Fit the ARIMA model
+    model <- arima(log_return, order = c(i, 0, j))
+    coef_model <- coef(model)
+    vcov_model <- sqrt(diag(vcov(model)))
+    
+    # Check the highest order AR and MA coefficients for significance
+    AR_valid <- "NO"  # Default as NO
+    MA_valid <- "NO"
+    if ("ar1" %in% names(coef_model) && i > 0) {  # Checking the highest AR coefficient
+      AR_valid <- ifelse(abs(coef_model[paste0("ar", i)] / vcov_model[paste0("ar", i)]) > 1.96, "YES", "NO")
+    }
+    if ("ma1" %in% names(coef_model) && j > 0) {  # Checking the highest MA coefficient
+      MA_valid <- ifelse(abs(coef_model[paste0("ma", j)] / vcov_model[paste0("ma", j)]) > 1.96, "YES", "NO")
+    }
+    
+    # Combine AR and MA validation results
+    Valid_AR_MA <- if(AR_valid == "YES" && MA_valid == "YES") "YES" else "NO"
+    
+    # Ljung-Box test on residuals to check for autocorrelation at lag 5
+    Ljung_Box_p_value <- Box.test(model$residuals, lag = max(5, i, j), type = "Ljung-Box")$p.value
+    Valid_Ljung_Box <- ifelse(Ljung_Box_p_value > 0.05, "YES", "NO")
+    
+    # Append the results to the dataframe
+    validity <- rbind(validity, data.frame(p = i, q = j, Valid_AR_MA = Valid_AR_MA, Valid_Ljung_Box = Valid_Ljung_Box))
+  }
+}
+
+```
+Hence the valid models are the following:
+```{r}
+validity %>%
+  filter(Valid_AR_MA == "YES" & Valid_Ljung_Box == "YES") %>%
+  kable(format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = F)
+
+```
+The model with the lowest AIC and BIC for the valid models is the following:
+```{r}
+validity %>%
+  filter(Valid_AR_MA == "YES" & Valid_Ljung_Box == "YES") %>%
+  left_join(AIC_BIC, by = c("p", "q")) %>%
+  filter(AIC == min(AIC)) %>%
+  kable(format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = F)
+
+validity %>%
+  filter(Valid_AR_MA == "YES" & Valid_Ljung_Box == "YES") %>%
+  left_join(AIC_BIC, by = c("p", "q")) %>%
+  filter(BIC == min(BIC)) %>%
+  kable(format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+Hence the model (2,3) is the best model according to the AIC and BIC criteria.
 
 ## Validation of the model
+We will now validate the model (2,3) by checking the residuals. We can check using QQ plot if the residuals are normally distributed, ie if the residuals are aligned with the normal distribution. 
+
+
+```{r}
+model <- arima(log_return, order = c(2, 0, 3))
+residuals <- model$residuals
+
+```
+
+
 # Prediction
 ## Confidence region of level α
 ## Hypothesis
