@@ -17,7 +17,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=
 ```{r}
 library(dplyr)
 library(kableExtra)
+library(astsa)
+library(forecast)
+library(portes)
+library(fUnitRoots)
+library(tseries)
 ```
+
 
 # The data 
 ## The studied temporal series
@@ -42,12 +48,16 @@ plotly::plot_ly(x = Time_series$date, y = Time_series$value, type = "scatter", m
                  xaxis = list(title = "Date"),
                  yaxis = list(title = "Value"))
 ```
-
+We see that the series is not stationary, the series might present seasonality or trend. 
+```{r}
+acf(Time_series$value)
+pacf(Time_series$value)
+```
 
 ## Transformation of the series 
 We will use the log return of the series to make it stationary. 
 ```{r}
-Time_series$log_return <- c(NA, diff(log(Time_series$value)))
+log_return <- c(diff(log(Time_series$value)))
 ```
 We will plot the log return of the series to check if it is stationary.
 ```{r}
@@ -56,14 +66,39 @@ plotly::plot_ly(x = Time_series$date, y = Time_series$log_return, type = "scatte
                  xaxis = list(title = "Date"),
                  yaxis = list(title = "Value"))
 ```
+The log return of the series seems to be stationary.
+```{r}
+acf(log_return)
+pacf(log_return)
+```
+
+We will test the stationarity of the series using the Augmented Dickey-Fuller test, the Phillips-Perron test and the KPSS stationnarity test.
+```{r}
+adfTest(log_return)
+pp.test(log_return)
+kpss.test(log_return)
+```
 
 
 ## Representation of the series before and after transformation
 
+```{r}
+plotly::subplot(
+  plotly::plot_ly(x = Time_series$date, y = Time_series$value, type = "scatter", mode = "lines") %>%
+    plotly::layout(title = "Initial series",
+                   xaxis = list(title = "Date"),
+                   yaxis = list(title = "Value")),
+  plotly::plot_ly(x = Time_series$date[-1], y = log_return, type = "scatter", mode = "lines") %>%
+    plotly::layout(title = "Log return of the series",
+                   xaxis = list(title = "Date"),
+                   yaxis = list(title = "Value"))
+)
+
+```
 
 # ARMA models
 ## Selection of the arma model
-
+We see that the tests of the stationarity consider a maximum lag of 5. Hence we will select our p and q parameters in the ARMA model between 0 and 6. 
 ## AIC and BIC criteria
 
 ## Validation of the model
