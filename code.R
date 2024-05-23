@@ -123,7 +123,7 @@ model <- arima(diff, order = c(2, 0, 3))
 p_value <- (1 - pnorm(abs(coef(model)) / sqrt(diag(model$var.coef)))) * 2
 p_value %>% as.data.frame() %>% setNames(c("p_value")) %>% kable() %>% kableExtra::kable_styling(bootstrap_options = "striped", full_width = F)
 
-# We find that the ARMA(4, 5) model is significant at a 5% level of significance. We will use this model to forecast the series.
+# We find that the ARMA(4, 5) model's coefficient are significant at a 5% level of significance. We will use this model to forecast the series.
 # In order to obtain the most reliable prediction, it's good to have normal residuals. We can check using QQ plot if the residuals are normally distributed,
 # ie if the residuals are aligned with the normal distribution. 
 model <- arima(diff, order = c(4, 0, 5))
