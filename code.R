@@ -143,9 +143,16 @@ arima(diff, order = c(4, 0, 5))
 
 
 # Prediction
-
-model <- arima(diff, order = c(4, 0, 5))
+diff_ts <- ts(diff, frequency = 12)
+model <- arima(diff_ts, order = c(4, 0, 5))
 
 forecast_values <- forecast(model, h = 10, level = c(95)) # on predit par exemple 10 valeurs
-
+png("images/forecast.png")
 plot(forecast_values)
+dev.off()
+
+last_forecast_values <- tail(forecast_values$mean, 25)
+png("images/last_forecast.png")
+plot(last_forecast_values)
+dev.off()
+
