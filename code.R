@@ -140,3 +140,12 @@ jarque.bera.test(residuals)
 
 # Finally, for our differentiated series we selected the model (4, 5) with non normal residuals. Here are our estimated coefficients:
 arima(diff, order = c(4, 0, 5))
+
+
+# Prediction
+
+model <- arima(diff, order = c(4, 0, 5))
+
+forecast_values <- forecast(model, h = 10, level = c(95)) # on predit par exemple 10 valeurs
+
+plot(forecast_values)
